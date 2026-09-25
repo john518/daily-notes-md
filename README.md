@@ -42,15 +42,17 @@ Be sure to use system python and site packages. These are needed for pywebview t
     uv pip install pywebview
 ```
 
-3. **Install frontend dependencies**
+3. **Build frontend in client subdirectory**
 
 ```bash
+    cd client
     npm install
-    npm run dev
+    npm run build
+    cd ..
 ```
 
 4. **Run the app**
 
 ```bash
-    python main.py
+    python scripts/main.py
 ```
