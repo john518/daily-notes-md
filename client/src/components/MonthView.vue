@@ -90,9 +90,12 @@ const handleEditDay = (day) => {
 
 <style scoped>
 .month-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
   font-family: inherit;
 }
 
@@ -147,11 +150,14 @@ const handleEditDay = (day) => {
 .days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(5, minmax(110px, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr)); /* Crucial: tells rows to divide the flexible height evenly */
+  flex: 1;
   border: 1px solid #cbd5e1;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
   background-color: #cbd5e1; /* acts as gap lines */
   gap: 1px;
+  min-height: 0; /* Prevents flexbox overflow bugs */
 }
+
 </style>

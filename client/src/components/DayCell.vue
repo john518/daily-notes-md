@@ -37,7 +37,8 @@ defineEmits(['edit-day'])
   flex-direction: column;
   overflow: hidden;
   transition: border-color 0.2s;
-  min-height: 100px;
+  height: 100%; /* Ensure it fills the grid cell vertically */
+  box-sizing: border-box;
 }
 
 .day-cell:hover {
