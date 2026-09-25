@@ -38,9 +38,14 @@ def main():
     """
 
     # Create the native window
+    # To test baseline vite/vue integration:
+        # In a terminal `cd client && npm run dev`
+        # In the code below, remove `html=html,`
+        # And add `url="http://localhost:5173",`
     webview.create_window(
         title="Daily Notes Markdown - Test",
         html=html,
+        # url="http://localhost:5173",
         width=800,
         height=600,
         resizable=True
