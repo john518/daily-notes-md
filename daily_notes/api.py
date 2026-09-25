@@ -7,7 +7,7 @@ class Api:
         Generates a flat list of day objects for the given year and month,
         including padding days from adjacent months to fill out the grid.
         """
-        print(f"--> API CALLED WITH: {year}, {month}", flush=True)
+        # print(f"--> API CALLED WITH: {year}, {month}", flush=True)
         cal = calendar.Calendar(firstweekday=6) # 6 = Sunday start
         month_days = []
 

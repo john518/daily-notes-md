@@ -17,8 +17,8 @@ def main():
         resizable=True,
         js_api=api  # Expose Api methods to window.pywebview.api
     )
-    webview.start(debug=True)  # opens browser dev tools
-    # webview.start()
+    # webview.start(debug=True)  # opens browser dev tools
+    webview.start()
 
 if __name__ == "__main__":
     main()
