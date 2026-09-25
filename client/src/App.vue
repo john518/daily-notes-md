@@ -1,7 +1,7 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import MonthView from './components/MonthView.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <MonthView />
 </template>
