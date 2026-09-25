@@ -44,6 +44,9 @@
         <button class="btn secondary" @click="close">Cancel</button>
         <button class="btn primary" @click="save">Save Entry</button>
       </div>
+
+      <!-- Custom visual resize indicator (optional, makes it obvious) -->
+      <div class="resize-handle"></div>
     </div>
   </div>
 </template>
@@ -119,15 +122,25 @@ onMounted(() => {
 
 .modal-card {
   background: #ffffff;
-  width: 90%;
-  max-width: 700px;
-  height: 80vh;
-  max-height: 600px;
+
+  /* Use explicit initial dimensions instead of pure percentages */
+  width: 650px;
+  height: 550px;
+  max-width: 95vw;
+  max-height: 95vh;
+  min-width: 450px;
+  min-height: 350px;
+
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+
+  resize: both;
+  overflow: auto;
+
+  /* Ensures our absolute-positioned handle anchors correctly */
+  position: relative;
 }
 
 .modal-header {
@@ -269,5 +282,18 @@ onMounted(() => {
 
 .btn.primary:hover {
   background: #1d4ed8;
+}
+
+/* Custom, easily-grabbable visual cue in the bottom right corner */
+.resize-handle {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  pointer-events: none; /* Let clicks pass through to the native resize zone */
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M11 1L1 11M11 5L5 11M11 9L9 11' stroke='%23475569' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  opacity: 0.8;
 }
 </style>
