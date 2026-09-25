@@ -1,7 +1,14 @@
 import calendar
-from datetime import date
+from datetime import datetime, date
 
 class Api:
+    def ping(self):
+            """Health check endpoint to verify backend is responsive."""
+            return {
+                "status": "ok",
+                "timestamp": datetime.now().isoformat()
+            }
+
     def get_month_data(self, year: int, month: int):
         """
         Generates a flat list of day objects for the given year and month,
@@ -42,4 +49,6 @@ class Api:
         return month_days
 
     def save_entry(self, date_str: str, content: str) -> bool:
+        """Write new content to data store."""
+        print(f"TODO save_entry for {date_str}")
         return False
