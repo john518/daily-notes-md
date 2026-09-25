@@ -34,8 +34,10 @@ A lightweight, local-first daily journal and notes desktop application built for
 
 2. **Setup Python Environment**
 
+Be sure to use system python and site packages. These are needed for pywebview to access system graphics (GTK).
+
 ```bash
-    uv venv --system-site-packages
+    uv venv --python /usr/bin/python3 --system-site-packages --clear
     source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
     uv pip install pywebview
 ```
