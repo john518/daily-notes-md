@@ -54,5 +54,5 @@ Be sure to use system python and site packages. These are needed for pywebview t
 4. **Run the app**
 
 ```bash
-    python scripts/main.py
+    PYTHONPATH=. python -u -m daily_notes.main
 ```

@@ -12,21 +12,30 @@
       <div v-for="day in weekdays" :key="day" class="weekday-label">{{ day }}</div>
     </div>
 
-    <!-- Days Grid (Dynamically sized rows) -->
+    <!-- Days Grid -->
     <div class="days-grid">
       <DayCell
         v-for="(day, index) in days"
         :key="index"
         :day="day"
-        @edit-day="handleEditDay"
+        @edit-day="openEditor"
       />
     </div>
+
+    <!-- Popup Editor Modal -->
+    <DayEditorModal
+      v-if="activeDay"
+      :day="activeDay"
+      @close="closeEditor"
+      @save="saveEntry"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import DayCell from './DayCell.vue'
+import DayEditorModal from './DayEditorModal.vue' // <-- 1. Import the modal
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const monthNames = [
@@ -38,25 +47,25 @@ const days = ref([])
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth() + 1)
 
+// 2. Track active day for the modal
+const activeDay = ref(null)
+
 const loadMonthData = async () => {
-  // Check if API is already there
+  const fetchFromPython = async () => {
+    try {
+      const data = await window.pywebview.api.get_month_data(currentYear.value, currentMonth.value)
+      days.value = data
+    } catch (err) {
+      console.error("Failed to fetch month data from Python:", err)
+    }
+  }
+
   if (window.pywebview && window.pywebview.api) {
     fetchFromPython()
   } else {
-    // Otherwise, wait for pywebview to signal it's ready
     window.addEventListener('pywebviewready', () => {
       fetchFromPython()
     }, { once: true })
-  }
-}
-
-const fetchFromPython = async () => {
-  try {
-    console.log("Fetching month data from Python API...")
-    const data = await window.pywebview.api.get_month_data(currentYear.value, currentMonth.value)
-    days.value = data
-  } catch (err) {
-    console.error("Failed to fetch month data from Python:", err)
   }
 }
 
@@ -78,8 +87,35 @@ const nextMonth = () => {
   loadMonthData()
 }
 
-const handleEditDay = (day) => {
-  console.log('Double clicked day:', day.date, 'File key:', day.fileKey)
+// 3. Modal open/close handlers
+const openEditor = (day) => {
+  activeDay.value = day
+}
+
+const closeEditor = () => {
+  activeDay.value = null
+}
+
+// 4. Handle saving the note back to Python
+const saveEntry = async (payload) => {
+  console.log('Saving entry for fileKey:', payload.fileKey, payload.content)
+
+  if (window.pywebview && window.pywebview.api) {
+    try {
+      // We will define this save method in Python next!
+      await window.pywebview.api.save_note(payload.fileKey, payload.content)
+
+      // Update local state so the cell immediately shows snippet changes if needed
+      const target = days.value.find(d => d.fileKey === payload.fileKey)
+      if (target) {
+        target.content = payload.content
+      }
+    } catch (err) {
+      console.error("Failed to save note via Python API:", err)
+    }
+  }
+
+  closeEditor()
 }
 
 onMounted(() => {
@@ -88,6 +124,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Keep your existing style rules here */
 .month-container {
   width: 100%;
   height: 100%;
@@ -149,12 +186,12 @@ onMounted(() => {
 .days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(0, 1fr); /* Automatically handles 5 or 6 week months smoothly */
+  grid-auto-rows: minmax(0, 1fr);
   flex: 1;
   border: 1px solid #cbd5e1;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  background-color: #cbd5e1; /* acts as gap lines */
+  background-color: #cbd5e1;
   gap: 1px;
   min-height: 0;
 }
