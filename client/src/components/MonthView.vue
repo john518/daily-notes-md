@@ -48,22 +48,6 @@ const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth() + 1)
 const activeDay = ref(null)
 
-// Used at startup to check that Python-Javascript bridge is instantiated
-const waitForApi = async (timeoutMs = 3000) => {
-  const startTime = Date.now()
-
-  while (
-    !window.pywebview ||
-    !window.pywebview.api ||
-    typeof window.pywebview.api.get_month_data !== 'function'
-  ) {
-    if (Date.now() - startTime > timeoutMs) {
-      throw new Error("Timeout: Pywebview API failed to initialize.")
-    }
-    await new Promise(resolve => setTimeout(resolve, 50))
-  }
-}
-
 const loadMonthData = async () => {
   try {
     const data = await window.pywebview.api.get_month_data(currentYear.value, currentMonth.value)
@@ -123,15 +107,8 @@ const saveEntry = async (payload) => {
 }
 
 onMounted(async () => {
-  try {
-    await waitForApi()
-    // Extra safety buffer for the IPC pipe
-    await new Promise(resolve => setTimeout(resolve, 100))
-    await loadMonthData()
-  } catch (err) {
-    console.error("Initialization error:", err)
-    // Optional: set a reactive error state to show a friendly banner in the UI
-  }
+  // NOTE: APPLICATION IS RESPONSIBLE FOR ENSURING API IS READY
+  await loadMonthData()
 })
 </script>
 
