@@ -46,26 +46,30 @@ const monthNames = [
 const days = ref([])
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth() + 1)
-
-// 2. Track active day for the modal
 const activeDay = ref(null)
 
-const loadMonthData = async () => {
-  const fetchFromPython = async () => {
-    try {
-      const data = await window.pywebview.api.get_month_data(currentYear.value, currentMonth.value)
-      days.value = data
-    } catch (err) {
-      console.error("Failed to fetch month data from Python:", err)
-    }
-  }
+// Used at startup to check that Python-Javascript bridge is instantiated
+const waitForApi = async (timeoutMs = 3000) => {
+  const startTime = Date.now()
 
-  if (window.pywebview && window.pywebview.api) {
-    fetchFromPython()
-  } else {
-    window.addEventListener('pywebviewready', () => {
-      fetchFromPython()
-    }, { once: true })
+  while (
+    !window.pywebview ||
+    !window.pywebview.api ||
+    typeof window.pywebview.api.get_month_data !== 'function'
+  ) {
+    if (Date.now() - startTime > timeoutMs) {
+      throw new Error("Timeout: Pywebview API failed to initialize.")
+    }
+    await new Promise(resolve => setTimeout(resolve, 50))
+  }
+}
+
+const loadMonthData = async () => {
+  try {
+    const data = await window.pywebview.api.get_month_data(currentYear.value, currentMonth.value)
+    days.value = data
+  } catch (err) {
+    console.error("Failed to fetch month data:", err)
   }
 }
 
@@ -96,7 +100,7 @@ const closeEditor = () => {
   activeDay.value = null
 }
 
-// 4. Handle saving the note back to Python
+// Handle saving the note back to Python
 const saveEntry = async (payload) => {
   console.log('Saving entry for fileKey:', payload.fileKey, payload.content)
 
@@ -118,8 +122,16 @@ const saveEntry = async (payload) => {
   closeEditor()
 }
 
-onMounted(() => {
-  loadMonthData()
+onMounted(async () => {
+  try {
+    await waitForApi()
+    // Extra safety buffer for the IPC pipe
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await loadMonthData()
+  } catch (err) {
+    console.error("Initialization error:", err)
+    // Optional: set a reactive error state to show a friendly banner in the UI
+  }
 })
 </script>
 
