@@ -9,4 +9,4 @@ cd "$ROOT_DIR"
 npm --prefix client run build
 
 # Run the python script
-PYTHONPATH=. python -m daily_notes.main
+PYTHONPATH=. python -u -m daily_notes.main
