@@ -3,7 +3,7 @@
     <!-- Header Navigation -->
     <div class="calendar-header">
       <button class="nav-btn" @click="prevMonth">&lt;</button>
-      <h2>September 2026</h2>
+      <h2>{{ monthNames[currentMonth - 1] }} {{ currentYear }}</h2>
       <button class="nav-btn" @click="nextMonth">&gt;</button>
     </div>
 
@@ -12,7 +12,7 @@
       <div v-for="day in weekdays" :key="day" class="weekday-label">{{ day }}</div>
     </div>
 
-    <!-- Days Grid (5 weeks = 35 cells) -->
+    <!-- Days Grid (Dynamically sized rows) -->
     <div class="days-grid">
       <DayCell
         v-for="(day, index) in days"
@@ -25,67 +25,66 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import DayCell from './DayCell.vue'
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+]
 
-// Hardcoded initial data matching the September 2026 mockup layout
-const days = ref([
-  // Week 1
-  { date: '2026-08-30', dayNumber: 30, isCurrentMonth: false, isToday: false, content: '' },
-  { date: '2026-08-31', dayNumber: 31, isCurrentMonth: false, isToday: false, content: '' },
-  { date: '2026-09-01', dayNumber: 1, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-02', dayNumber: 2, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-03', dayNumber: 3, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-04', dayNumber: 4, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-05', dayNumber: 5, isCurrentMonth: true, isToday: false, content: '' },
-  // Week 2
-  { date: '2026-09-06', dayNumber: 6, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-07', dayNumber: 7, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-08', dayNumber: 8, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-09', dayNumber: 9, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-10', dayNumber: 10, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-11', dayNumber: 11, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-12', dayNumber: 12, isCurrentMonth: true, isToday: false, content: '' },
-  // Week 3
-  { date: '2026-09-13', dayNumber: 13, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-14', dayNumber: 14, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-15', dayNumber: 15, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-16', dayNumber: 16, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-17', dayNumber: 17, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-18', dayNumber: 18, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-19', dayNumber: 19, isCurrentMonth: true, isToday: false, content: '' },
-  // Week 4
-  { date: '2026-09-20', dayNumber: 20, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-21', dayNumber: 21, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-22', dayNumber: 22, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-23', dayNumber: 23, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-24', dayNumber: 24, isCurrentMonth: true, isToday: true, content: "a rat in Tom's house may eat Tom's ice cream" }, // Mockup sample entry[cite: 1]
-  { date: '2026-09-25', dayNumber: 25, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-26', dayNumber: 26, isCurrentMonth: true, isToday: false, content: '' },
-  // Week 5
-  { date: '2026-09-27', dayNumber: 27, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-28', dayNumber: 28, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-29', dayNumber: 29, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-09-30', dayNumber: 30, isCurrentMonth: true, isToday: false, content: '' },
-  { date: '2026-10-01', dayNumber: 1, isCurrentMonth: false, isToday: false, content: '' },
-  { date: '2026-10-02', dayNumber: 2, isCurrentMonth: false, isToday: false, content: '' },
-  { date: '2026-10-03', dayNumber: 3, isCurrentMonth: false, isToday: false, content: '' }
-])
+const days = ref([])
+const currentYear = ref(new Date().getFullYear())
+const currentMonth = ref(new Date().getMonth() + 1)
+
+const loadMonthData = async () => {
+  // Check if API is already there
+  if (window.pywebview && window.pywebview.api) {
+    fetchFromPython()
+  } else {
+    // Otherwise, wait for pywebview to signal it's ready
+    window.addEventListener('pywebviewready', () => {
+      fetchFromPython()
+    }, { once: true })
+  }
+}
+
+const fetchFromPython = async () => {
+  try {
+    console.log("Fetching month data from Python API...")
+    const data = await window.pywebview.api.get_month_data(currentYear.value, currentMonth.value)
+    days.value = data
+  } catch (err) {
+    console.error("Failed to fetch month data from Python:", err)
+  }
+}
 
 const prevMonth = () => {
-  console.log('Navigate to previous month')
+  currentMonth.value -= 1
+  if (currentMonth.value < 1) {
+    currentMonth.value = 12
+    currentYear.value -= 1
+  }
+  loadMonthData()
 }
 
 const nextMonth = () => {
-  console.log('Navigate to next month')
+  currentMonth.value += 1
+  if (currentMonth.value > 12) {
+    currentMonth.value = 1
+    currentYear.value += 1
+  }
+  loadMonthData()
 }
 
 const handleEditDay = (day) => {
-  console.log('Double clicked day:', day.date)
-  // This is where you'll trigger opening the editor view later
+  console.log('Double clicked day:', day.date, 'File key:', day.fileKey)
 }
+
+onMounted(() => {
+  loadMonthData()
+})
 </script>
 
 <style scoped>
@@ -150,14 +149,13 @@ const handleEditDay = (day) => {
 .days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(5, minmax(0, 1fr)); /* Crucial: tells rows to divide the flexible height evenly */
+  grid-auto-rows: minmax(0, 1fr); /* Automatically handles 5 or 6 week months smoothly */
   flex: 1;
   border: 1px solid #cbd5e1;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
   background-color: #cbd5e1; /* acts as gap lines */
   gap: 1px;
-  min-height: 0; /* Prevents flexbox overflow bugs */
+  min-height: 0;
 }
-
 </style>
