@@ -1,54 +1,61 @@
 import calendar
+from dataclasses import asdict
 from datetime import datetime, date
 
+from .day_entry import DayEntry
+
 class Api:
+    def __init__(self, storage):
+        self.storage = storage
+
     def ping(self):
-            """Health check endpoint to verify backend is responsive."""
-            return {
-                "status": "ok",
-                "timestamp": datetime.now().isoformat()
-            }
+        """Health check endpoint to verify backend is responsive."""
+        return {
+            "status": "ok",
+            "timestamp": datetime.now().isoformat()
+        }
 
     def get_month_data(self, year: int, month: int):
-        """
-        Generates a flat list of day objects for the given year and month,
-        including padding days from adjacent months to fill out the grid.
-        """
-        # print(f"--> API CALLED WITH: {year}, {month}", flush=True)
-        cal = calendar.Calendar(firstweekday=6) # 6 = Sunday start
+        print(f"get_month_data for {year}, {month}")
+        month_entries = self.storage.get_month_entries(year, month)
+        cal = calendar.Calendar(firstweekday=6) # Sunday start, adjust if Monday start (0)
+
+        today = date.today()
         month_days = []
 
-        today_str = date.today().isoformat()
+        for day_info in cal.itermonthdays4(year, month):
+            y, m, d, wd = day_info
+            is_current = (m == month)
 
-        # cal.itermonthdates(year, month) yields datetime.date objects
-        # for the entire grid, including padding days.
-        for d in cal.itermonthdates(year, month):
-            is_current = (d.month == month)
-            is_today = (d.isoformat() == today_str)
+            # If it's outside the current month (padding days), d is still part of the grid
+            # but we can handle content and keys appropriately.
+            content = month_entries.get(d, "") if is_current else ""
 
-            # Format YYMMDD string for filename lookup later (e.g., '260924.md')
-            # d.strftime('%y%m%d') will give us e.g. '260924'
-            file_key = d.strftime('%y%m%d')
+            # Construct fileKey (YYMMDD format) for current month days
+            yy_str = f"{y % 100:02d}"
+            mm_str = f"{m:02d}"
+            dd_str = f"{d:02d}"
+            file_key = f"{yy_str}{mm_str}{dd_str}" if is_current else ""
 
-            # TODO: Later this is where you'll check if ~/.local/share/daily-notes-md/{file_key}.md exists
-            # and read its content preview. For now, we'll leave it empty.
-            content = ""
-            if d.isoformat() == "2026-09-24":
-                content = "a rat in Tom's house may eat Tom's ice cream" # Mock data check
+            is_today = (y == today.year and m == today.month and d == today.day) if is_current else False
 
-            month_days.append({
-                'date': d.isoformat(),
-                'dayNumber': d.day,
-                'isCurrentMonth': is_current,
-                'isToday': is_today,
-                'fileKey': file_key,
-                'content': content
-            })
+            day_obj = DayEntry(
+                year=y,
+                month=m,
+                day=d,
+                dayNumber=d,
+                weekday=wd,
+                isCurrentMonth=is_current,
+                isToday=is_today,
+                fileKey=file_key,
+                content=content
+            )
 
-        # print("Exit get_month_data()")
+            month_days.append(asdict(day_obj))
+
+        print(month_days)
         return month_days
 
-    def save_entry(self, date_str: str, content: str) -> bool:
-        """Write new content to data store."""
-        print(f"TODO save_entry for {date_str}")
-        return False
+    def save_entry(self, year: int, month: int, day: int, content: str):
+        self.storage.write_entry(year, month, day, content)
+        return {"status": "saved"}

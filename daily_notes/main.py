@@ -2,9 +2,11 @@ from pathlib import Path
 import webview
 
 from daily_notes.api import Api
+from daily_notes.storage import Storage
 
 def main():
-    api = Api()
+    storage = Storage()
+    api = Api(storage=storage)
 
     # Get absolute path to the built index.html
     dist_path = Path("client/dist/index.html").resolve().as_uri()

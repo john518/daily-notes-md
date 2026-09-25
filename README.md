@@ -16,6 +16,12 @@ A lightweight, local-first daily journal and notes desktop application built for
 * **Backend:** Python 3, `pywebview`
 * **Data Layer:** Flat-file Markdown + Git version control
 
+## Storage
+
+No databases were used in the development of this app :)
+
+Instead, journal entries are organized in a hierarchical YY/MM/YYMMDD.md structure beneath a configurable DATA_DIR. The root data directory is resolved from the environment configuration file at `~/.config/john.daily-notes/env`, supporting environment variable expansion like ${HOME}, with a fallback default for development testing.
+
 ## Getting Started
 
 ### Prerequisites
