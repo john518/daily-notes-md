@@ -64,7 +64,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'saved'])
+const emit = defineEmits(['closed', 'saved'])
 
 const currentTab = ref('edit')
 const editableContent = ref(props.day.content || '')
@@ -86,7 +86,7 @@ const formatDate = (dateStr) => {
 }
 
 const close = () => {
-  emit('close')
+  emit('closed')
 }
 
 const save = async () => {
@@ -100,7 +100,7 @@ const save = async () => {
     if (response.status === 'success') {
       console.log(response.message)
       emit('saved', { fileKey: props.day.fileKey, content: editableContent.value })  // notify MonthView
-      emit('close')
+      emit('closed')
     }
   } catch (err) {
     console.error("Error saving entry across bridge:", err)

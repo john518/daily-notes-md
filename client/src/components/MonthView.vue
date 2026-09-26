@@ -26,7 +26,7 @@
     <DayEditorModal
       v-if="activeDay"
       :day="activeDay"
-      @close="onEditorClosed"
+      @closed="onEditorClosed"
       @saved="onDaySaved"
     />
   </div>
