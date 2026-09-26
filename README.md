@@ -2,6 +2,9 @@
 
 A lightweight, local-first daily journal and notes desktop application built for longevity and privacy. Designed to integrate natively into a Git-backed document workflow.
 
+
+<img src="./docs/images/DailyNotesMarkdown.png" width="1076" alt="Screenshot">
+
 ## Key Features
 
 * **Local-First Desktop App:** Powered by Python and `pywebview`, leveraging native OS web rendering for high performance and low resource overhead.
@@ -26,7 +29,7 @@ Instead, journal entries are organized in a hierarchical YY/MM/YYMMDD.md structu
 
 ### Prerequisites
 
-* Python 3.10+ with `pip`
+* Python 3.14+ with `uv`
 * Node.js & npm (for frontend asset building)
 
 ### Installation & Development
@@ -59,6 +62,8 @@ Be sure to use system python and site packages. These are needed for pywebview t
 
 4. **Run the app**
 
+You can run without activating the venv or installing the app by calling python explicitly and setting PYTHONPATH to the root directory:
+
 ```bash
-    PYTHONPATH=. python -u -m daily_notes.main
+    PYTHONPATH=. ./.venv/bin/python -u -m daily_notes.main
 ```
