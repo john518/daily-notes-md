@@ -99,6 +99,7 @@ const save = async () => {
     )
     if (response.status === 'success') {
       console.log(response.message)
+      emit('save')  // notify parent to reload
       emit('close')
     }
   } catch (err) {

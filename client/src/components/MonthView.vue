@@ -26,8 +26,8 @@
     <DayEditorModal
       v-if="activeDay"
       :day="activeDay"
-      @close="closeEditor"
-      @save="saveEntry"
+      @close="onEditorClosed"
+      @save="loadMonthData"
     />
   </div>
 </template>
@@ -80,34 +80,12 @@ const openEditor = (day) => {
   activeDay.value = day
 }
 
-const closeEditor = () => {
+const onEditorClosed = () => {
   activeDay.value = null
 }
 
-// Handle saving the note back to Python
-const saveEntry = async (payload) => {
-  console.log('Saving entry for fileKey:', payload.fileKey, payload.content)
-
-  if (window.pywebview && window.pywebview.api) {
-    try {
-      // We will define this save method in Python next!
-      await window.pywebview.api.save_note(payload.fileKey, payload.content)
-
-      // Update local state so the cell immediately shows snippet changes if needed
-      const target = days.value.find(d => d.fileKey === payload.fileKey)
-      if (target) {
-        target.content = payload.content
-      }
-    } catch (err) {
-      console.error("Failed to save note via Python API:", err)
-    }
-  }
-
-  closeEditor()
-}
-
 onMounted(async () => {
-  // NOTE: APPLICATION IS RESPONSIBLE FOR ENSURING API IS READY
+  // NOTE: APPLICATION IS RESPONSIBLE FOR ENSURING PYTHON-JAVASCRIPT BRIDGE (API) IS READY
   await loadMonthData()
 })
 </script>
