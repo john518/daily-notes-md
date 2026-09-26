@@ -3,7 +3,7 @@
     <div class="modal-card">
       <!-- Modal Header -->
       <div class="modal-header">
-        <h3>Journal Entry — {{ formatDate(day.date) }}</h3>
+        <h3>Journal Entry — {{ formatDate(day) }}</h3>
         <button class="close-btn" @click="close">&times;</button>
       </div>
 
@@ -37,6 +37,7 @@
           class="markdown-preview"
           v-html="renderedMarkdown"
         ></div>
+
       </div>
 
       <!-- Modal Footer -->
@@ -76,12 +77,10 @@ const renderedMarkdown = computed(() => {
   return DOMPurify.sanitize(rawHtml)
 })
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return ''
+const formatDate = (day) => {
+  if (!day) return ''
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
-  // Fix timezone shift by splitting components manually if needed
-  const [year, month, day] = dateStr.split('-')
-  const d = new Date(year, month - 1, day)
+  const d = new Date(day.year, day.month - 1, day.day)
   return d.toLocaleDateString(undefined, options)
 }
 
