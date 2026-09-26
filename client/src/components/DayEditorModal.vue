@@ -89,12 +89,21 @@ const close = () => {
   emit('close')
 }
 
-const save = () => {
-  emit('save', {
-    fileKey: props.day.fileKey,
-    date: props.day.date,
-    content: editableContent.value
-  })
+const save = async () => {
+  try {
+    const response = await window.pywebview.api.save_entry(
+      props.day.year,
+      props.day.month,
+      props.day.day,
+      editableContent.value
+    )
+    if (response.status === 'success') {
+      console.log(response.message)
+      emit('close')
+    }
+  } catch (err) {
+    console.error("Error saving entry across bridge:", err)
+  }
 }
 
 onMounted(() => {

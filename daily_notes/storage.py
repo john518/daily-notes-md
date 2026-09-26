@@ -87,4 +87,5 @@ class Storage:
                         entries[day_num] = self.read_entry(year, month, day_num)
                     except ValueError:
                         continue
+        # print(entries)
         return entries

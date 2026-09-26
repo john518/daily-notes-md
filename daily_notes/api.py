@@ -16,7 +16,7 @@ class Api:
         }
 
     def get_month_data(self, year: int, month: int):
-        print(f"get_month_data for {year}, {month}")
+        # print(f"get_month_data for {year}, {month}")
         month_entries = self.storage.get_month_entries(year, month)
         cal = calendar.Calendar(firstweekday=6) # Sunday start, adjust if Monday start (0)
 
@@ -53,9 +53,14 @@ class Api:
 
             month_days.append(asdict(day_obj))
 
-        print(month_days)
+        # print(month_days)
         return month_days
 
     def save_entry(self, year: int, month: int, day: int, content: str):
-        self.storage.write_entry(year, month, day, content)
-        return {"status": "saved"}
+        """Saves or updates a daily journal entry markdown file."""
+        try:
+            self.storage.write_entry(year, month, day, content)
+            return {"status": "success", "message": f"Saved entry for {year}-{month:02d}-{day:02d}"}
+        except Exception as e:
+            print(f"Failed to save entry: {e}")
+            return {"status": "error", "message": str(e)}

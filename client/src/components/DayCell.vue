@@ -80,4 +80,8 @@ defineEmits(['edit-day'])
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
+
+.day-content p {
+  margin: 0;
+}
 </style>
