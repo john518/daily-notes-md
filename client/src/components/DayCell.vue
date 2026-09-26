@@ -76,12 +76,12 @@ defineEmits(['edit-day'])
   color: #475569;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  flex: 1;
+  min-height: 0;
 }
 
 .day-content p {
   margin: 0;
+  padding: 0
 }
 </style>
