@@ -27,7 +27,7 @@
       v-if="activeDay"
       :day="activeDay"
       @close="onEditorClosed"
-      @save="loadMonthData"
+      @saved="onDaySaved"
     />
   </div>
 </template>
@@ -82,6 +82,16 @@ const openEditor = (day) => {
 
 const onEditorClosed = () => {
   activeDay.value = null
+}
+
+const onDaySaved = ({ fileKey, content }) => {
+  // Map creates a new array reference, guaranteeing Vue triggers a re-render
+  days.value = days.value.map(day => {
+    if (day.fileKey === fileKey) {
+      return { ...day, content: content } // Return a new object with updated content
+    }
+    return day
+  })
 }
 
 onMounted(async () => {

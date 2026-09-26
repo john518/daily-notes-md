@@ -64,7 +64,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'save'])
+const emit = defineEmits(['close', 'saved'])
 
 const currentTab = ref('edit')
 const editableContent = ref(props.day.content || '')
@@ -99,7 +99,7 @@ const save = async () => {
     )
     if (response.status === 'success') {
       console.log(response.message)
-      emit('save')  // notify parent to reload
+      emit('saved', { fileKey: props.day.fileKey, content: editableContent.value })  // notify MonthView
       emit('close')
     }
   } catch (err) {
