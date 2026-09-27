@@ -4,6 +4,9 @@
     <div class="calendar-header">
       <button class="nav-btn" @click="prevMonth">&lt;</button>
       <h2>{{ monthNames[currentMonth - 1] }} {{ currentYear }}</h2>
+
+      <MonthYearPicker :month=currentMonth :year=currentYear @jump="onJumpToDate"></MonthYearPicker>
+
       <button class="nav-btn" @click="nextMonth">&gt;</button>
     </div>
 
@@ -36,6 +39,7 @@
 import { ref, onMounted } from 'vue'
 import DayCell from './DayCell.vue'
 import DayEditorModal from './DayEditorModal.vue' // <-- 1. Import the modal
+import MonthYearPicker from './MonthYearPicker.vue'
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const monthNames = [
@@ -72,6 +76,12 @@ const nextMonth = () => {
     currentMonth.value = 1
     currentYear.value += 1
   }
+  loadMonthData()
+}
+
+const onJumpToDate = ({ year, month }) => {
+  currentMonth.value = month
+  currentYear.value = year
   loadMonthData()
 }
 
