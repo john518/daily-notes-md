@@ -1,7 +1,6 @@
 # Daily Notes Markdown (`daily-notes-md`)
 
-A lightweight, local-first daily journal and notes desktop application built for longevity and privacy. Designed to integrate natively into a Git-backed document workflow.
-
+A lightweight, local-first daily journal and notes desktop application built for longevity and privacy. Designed to integrate natively into a Git-backed document workflow. It is intended for developers who are comfortable building the app using npm and running from python. It has only been used on linux (Ubuntu) systems, and might need some tweaking for other OS platforms.
 
 <img src="./docs/images/DailyNotesMarkdown.png" width="1076" alt="Screenshot">
 
@@ -15,7 +14,7 @@ A lightweight, local-first daily journal and notes desktop application built for
 
 ## Tech Stack
 
-* **Frontend:** Vue.js 3, Vite, Web Awesome, `date-fns`
+* **Frontend:** Vue.js 3, Vite
 * **Backend:** Python 3, `pywebview`
 * **Data Layer:** Flat-file Markdown + Git version control
 

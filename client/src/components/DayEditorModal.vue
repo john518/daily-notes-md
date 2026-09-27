@@ -7,6 +7,12 @@
         <button class="close-btn" @click="close">&times;</button>
       </div>
 
+      <!-- Error Banner -->
+      <div v-if="saveError" class="error-banner">
+        <span class="error-text">⚠️ Failed to save note: {{ saveError }}</span>
+        <button class="error-close-btn" @click="saveError = null" title="Dismiss">×</button>
+      </div>
+
       <!-- Mode Tabs -->
       <div class="tab-bar">
         <button
@@ -70,6 +76,7 @@ const emit = defineEmits(['closed', 'saved'])
 const currentTab = ref('edit')
 const editableContent = ref(props.day.content || '')
 const textareaRef = ref(null)
+const saveError = ref(null)
 
 // Safely parse and sanitize markdown for preview tab
 const renderedMarkdown = computed(() => {
@@ -89,6 +96,9 @@ const close = () => {
 }
 
 const save = async () => {
+  // Clear any previous error immediately when trying again
+  saveError.value = null
+
   try {
     const response = await window.pywebview.api.save_entry(
       props.day.year,
@@ -96,13 +106,22 @@ const save = async () => {
       props.day.day,
       editableContent.value
     )
-    if (response.status === 'success') {
-      console.log(response.message)
-      emit('saved', { fileKey: props.day.fileKey, content: editableContent.value })  // notify MonthView
-      emit('closed')
+
+    // If the server returned a logical failure, throw it so it catches below
+    if (response.status !== 'success') {
+      throw new Error(response.message || 'Server reported failure while saving to disk.')
     }
+
+    // Success path
+    console.log(response.message)
+    emit('saved', { fileKey: props.day.fileKey, content: editableContent.value })  // notify MonthView
+    emit('closed')
+
   } catch (err) {
-    console.error("Error saving entry across bridge:", err)
+    console.error("Error saving day entry:", err)
+
+    // Keep modal open and show error message
+    saveError.value = err.message || 'Unknown error saving to disk.'
   }
 }
 
@@ -305,4 +324,39 @@ onMounted(() => {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M11 1L1 11M11 5L5 11M11 9L9 11' stroke='%23475569' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   opacity: 0.8;
 }
+
+/* Error banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.error-text {
+  flex-grow: 1;
+  word-break: break-word;
+}
+
+.error-close-btn {
+  background: transparent;
+  border: none;
+  color: #991b1b;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.error-close-btn:hover {
+  color: #7f1d1d;
+}
+
 </style>
