@@ -5,7 +5,6 @@
 - [ ] Add unit tests
 - [ ] Add `pyproject.toml` file
 - [ ] Add data backup strategy/script
-- [ ] Set TBD window cosmetics (color, favicon)
 - [ ] Add poor man's search feature to MonthView
 - [ ] Refactor navigation header as new component
 - [ ] TBD tooltip preview?
@@ -18,3 +17,4 @@
 - [x] Fix DayEditorModal to show date correctly
 - [x] Add year-month picker
 - [x] Add error handling (inform user when problems occur)
+- [x] Set TBD window cosmetics (color, favicon)
