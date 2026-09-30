@@ -9,4 +9,4 @@ cd "$ROOT_DIR"
 npm --prefix client run build
 
 # Run the python script
-PYTHONPATH=. ./.venv/bin/python -u -m daily_notes.main
+PYTHONPATH=. ./.venv/bin/python -u daily_notes/daily-notes.py

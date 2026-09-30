@@ -22,9 +22,8 @@ def set_custom_header(window, bg_color="#2c3e5", text_color="#ff00ff"):
     header_bar.set_name("isolated-window-header")
 
     # Set icon
-    # icon_image = Gtk.Image.new_from_file("/home/john/temp/asterisk.png")
-    icon_image = Gtk.Image.new_from_file("/home/john/temp/favicon.ico")
-    icon_image.set_pixel_size(32)
+    icon_image = Gtk.Image.new_from_icon_name("daily-notes", Gtk.IconSize.BUTTON)
+    icon_image.set_pixel_size(24)
     header_bar.pack_start(icon_image)
 
     title_label = Gtk.Label(label=" Daily Notes Markdown") # Optional leading space for separation

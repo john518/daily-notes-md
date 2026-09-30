@@ -7,7 +7,7 @@ def setup_window_cosmetics(window, bg_color: str, title_color: str) -> None:
     """Applies native window cosmetics if running on a supported platform (Linux/GTK)."""
 
     # Only attempt GTK styling on Linux
-    print(f"{sys.platform=}")
+    # print(f"{sys.platform=}")
     if sys.platform.startswith("linux"):
         try:
             from .gtk import setup_window_cosmetics as apply_gtk_cosmetics
