@@ -151,9 +151,8 @@ onMounted(() => {
 .modal-card {
   background: #ffffff;
 
-  /* Use explicit initial dimensions instead of pure percentages */
-  width: 650px;
-  height: 550px;
+  width: 90%;
+  height: 90%;
   max-width: 95vw;
   max-height: 95vh;
   min-width: 450px;
