@@ -58,41 +58,22 @@ def get_date_range(yymm_str):
     return start_date, end_date
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Download legacy daily notes from GAE web server."
-    )
-    parser.add_argument(
-        "yymm",
-        type=str,
-        help="Month and year in YYMM format (e.g., 1306 for June 2013)",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        help="Directory to save raw JSON and generated Markdown files",
-    )
-    args = parser.parse_args()
-
+def fetch_data(yymm: str) -> list | None:
     try:
-        start_date, end_date = get_date_range(args.yymm)
+        start_date, end_date = get_date_range(yymm)
     except ValueError as e:
         print(f"Error: {e}")
-        return
-
-    if not SACSID:
-        print("Error: SACSID must be set in your .env file.")
-        return
+        raise RuntimeError(f"Error processing month {yymm}")
 
     # Query the range API
     url = f"https://daily-notes.appspot.com/api/range/{start_date}-{end_date}/limit=35"
     print(f"Fetching notes for range {start_date} to {end_date}...")
-    # url="https://daily-notes.appspot.com/api/range/20260927-20261101/limit=35"
     print(f"{url=}")
 
     cookies = {
         "SACSID": SACSID
     }
+    print(f"{cookies=}")
 
     response = requests.get(url, cookies=cookies)
     # print(response.status_code)
@@ -101,42 +82,32 @@ def main():
 
     if response.status_code == 401:
         print("Unauthorized (401)")
-        return
+        return None
 
     if response.status_code != 200:
         print(f"Failed to fetch data: {response.status_code} - {response.text}")
-        return
+        return None
 
     data = response.json()
     # print(data)
 
     entry_list = data.get("range")
-    if not entry_list:
-        print("No range found in data")
-        return
+    return entry_list
 
-    print(f"Number of entries: {len(entry_list)}")
+
+def write_data(entry_list: list[dict], output_dir: Path):
+    """Writes entries to markdown files."""
+    # print(f"Number of entries: {len(entry_list)}")
     # for entry in entry_list:
-    #     full_date_code = entry.get("dc")
+    #     full_date_code = entry.get("dc", "000000")
     #     date_code = full_date_code[2:]
     #     print(date_code)
-
-    # Get data directory
-    if args.output_dir is None:
-        default_dir = os.getenv("DAILY_NOTES_DATA_DIR")
-        if default_dir is not None:
-            args.output_dir = Path(default_dir)
-
-    # Get data dir
-    yy = args.yymm[:2]
-    mm = args.yymm[2:]
-    data_dir = args.output_dir / yy / mm
-
     # Make sure directory is created
-    print(f"Writing to {data_dir=}")
-    data_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Writing to {output_dir=}")
+
     for entry in entry_list:
-        full_date_code = entry.get("dc")
+        full_date_code = entry.get("dc", "000000")
 
         content = entry.get("co")
         if not content:
@@ -144,12 +115,70 @@ def main():
             continue
 
         date_code = full_date_code[2:]
-        file_path = data_dir / f"{date_code}.md"
+        file_path = output_dir / f"{date_code}.md"
         with open(file_path, "w") as fp:
             fp.write(content)
             print(f"Wrote {file_path}")
 
-    return
+
+def process_steps(args: argparse.Namespace):
+    """Processes N months based on migration_state.csv file."""
+    raise NotADirectoryError("process_steps() not yet supported")
+
+
+def process_month(yymm: str, data_dir: Path) -> bool:
+    """Retrieves data for 1 month from legacy system and writes to local file system."""
+    entry_list = fetch_data(yymm)
+    if entry_list:
+        yy = yymm[:2]
+        mm = yymm[2:]
+        month_dir = data_dir / yy / mm
+        write_data(entry_list, month_dir)
+    else:
+        print(f"No data found for month {yymm}")
+        return False
+
+    return True
+
+
+def main():
+    """Entry point"""
+    parser = argparse.ArgumentParser(
+        description="Download legacy daily notes from GAE web server."
+    )
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        help="Override data directory for Markdown files",
+    )
+
+    # Mutually exclusive group to specify the processing mode/sequence
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-m", "--month", metavar="yymm", help="Process a single specific month (YYMM format)")
+    group.add_argument("-s", "--step", type=int, metavar="N", help="Process N months working backward from last success")
+
+    args = parser.parse_args()
+
+    # Make sure SACSID is defined
+    if not SACSID:
+        print("Error: SACSID must be set in your .env file.")
+        return
+
+    # Set data directory
+    if args.data_dir is None:
+        default_dir = os.getenv("DAILY_NOTES_DATA_DIR")
+        if default_dir is not None:
+            args.data_dir = Path(default_dir)
+    if args.data_dir is None:
+        raise RuntimeError("No data directory specified in CLI or .env file")
+    args.data_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.step is not None:
+        process_steps(args)
+    elif args.month is not None:
+        process_month(args.month, args.data_dir)
+    else:
+        print("Internal error - unrecognized CLI arguments")
 
 
 if __name__ == "__main__":
