@@ -34,7 +34,7 @@ import requests
 load_dotenv()
 
 # Get authorization cookie
-SACSID = os.getenv("SACSID")
+SACSID = os.getenv("LEGACY_SACSID")
 
 
 def get_date_range(yymm_str):
@@ -69,7 +69,7 @@ def main():
     )
     parser.add_argument(
         "--output-dir",
-        default="./legacy_output",
+        type=Path,
         help="Directory to save raw JSON and generated Markdown files",
     )
     args = parser.parse_args()
@@ -120,6 +120,14 @@ def main():
         full_date_code = entry.get("dc")
         date_code = full_date_code[2:]
         print(date_code)
+
+    # Get output dir
+    if args.output_dir is None:
+        data_dir = os.getenv("DAILY_NOTES_DATA_DIR")
+        if data_dir is not None:
+            args.output_dir = Path(data_dir)
+
+    print(f"TODO {args.output_dir=}")
 
     return
 
