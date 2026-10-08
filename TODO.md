@@ -7,6 +7,7 @@
 - [ ] Add data backup strategy/script
 - [ ] Add poor man's search feature to MonthView
 - [ ] Refactor navigation header as new component
+- [ ] Move source to `04-pim`
 - [ ] TBD tooltip preview?
 - [ ] Cache 3 month data window?
 
