@@ -116,50 +116,40 @@ def main():
         return
 
     print(f"Number of entries: {len(entry_list)}")
+    # for entry in entry_list:
+    #     full_date_code = entry.get("dc")
+    #     date_code = full_date_code[2:]
+    #     print(date_code)
+
+    # Get data directory
+    if args.output_dir is None:
+        default_dir = os.getenv("DAILY_NOTES_DATA_DIR")
+        if default_dir is not None:
+            args.output_dir = Path(default_dir)
+
+    # Get data dir
+    yy = args.yymm[:2]
+    mm = args.yymm[2:]
+    data_dir = args.output_dir / yy / mm
+
+    # Make sure directory is created
+    print(f"Writing to {data_dir=}")
+    data_dir.mkdir(parents=True, exist_ok=True)
     for entry in entry_list:
         full_date_code = entry.get("dc")
+
+        content = entry.get("co")
+        if not content:
+            print(f"Content for {full_date_code} is empty - skipping")
+            continue
+
         date_code = full_date_code[2:]
-        print(date_code)
-
-    # Get output dir
-    if args.output_dir is None:
-        data_dir = os.getenv("DAILY_NOTES_DATA_DIR")
-        if data_dir is not None:
-            args.output_dir = Path(data_dir)
-
-    print(f"TODO {args.output_dir=}")
+        file_path = data_dir / f"{date_code}.md"
+        with open(file_path, "w") as fp:
+            fp.write(content)
+            print(f"Wrote {file_path}")
 
     return
-
-    # Create output directory and save raw JSON backup
-    os.makedirs(args.output_dir, exist_ok=True)
-    json_path = os.path.join(args.output_dir, f"raw_{args.yymm}.json")
-    with open(json_path, "w") as f:
-        json.dump(data, f, indent=2)
-    print(f"Saved raw JSON to {json_path}")
-
-    # Parse and write individual Markdown files
-    notes = data if isinstance(data, list) else data.get("notes", [])
-
-    if not notes:
-        print(
-            "No notes found or unexpected JSON structure. Inspect raw JSON file."
-        )
-        return
-
-    print(f"Writing {len(notes)} markdown files to {args.output_dir}/...")
-    for note in notes:
-        note_date = note.get("date", "unknown-date").replace("/", "-")
-        content = note.get("content", "")
-        title = note.get("title", "")
-
-        md_path = os.path.join(args.output_dir, f"{note_date}.md")
-        with open(md_path, "w") as f:
-            if title:
-                f.write(f"# {title}\n\n")
-        f.write(content)
-
-    print("Migration batch complete!")
 
 
 if __name__ == "__main__":
