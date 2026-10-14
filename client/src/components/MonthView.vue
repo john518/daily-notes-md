@@ -214,8 +214,9 @@ onMounted(async () => {
 /* Position the popover to open nicely to the right of the left-side icon button */
 .date-picker-wrapper :deep(.month-year-picker) {
   position: absolute;
-  left: 0;
-  top: calc(100% + 6px);
+  left: calc(100% + 8px);     /* Push it to the right of the wrapper with an 8px gap */
+  top: 50%;                    /* Center it vertically relative to the icon button */
+  transform: translateY(-50%); /* Perfect vertical centering */
   z-index: 100;
   white-space: nowrap;
 }
