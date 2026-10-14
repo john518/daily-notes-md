@@ -115,7 +115,7 @@ Categories=Utility;Office;
 StartupWMClass=daily-notes.py
 ```
 
-We can don't need paths for `Exec` and `Icon` because they are in standard locations:
+We don't need paths for `Exec` and `Icon` because they are in standard locations:
 
   - `$HOME/.local/bin/daily-notes`
   - `$HOME/.local/share/icons/hicolor/256x256/apps/daily-notes.png`
@@ -134,7 +134,22 @@ update-desktop-database ~/.local/share/applications/
 * **Wrapper Path:** `~/.local/bin/daily-notes`
 
 ```bash
-#!/bin/bash
-python3 /home/john/projects/05-lab/git/daily-notes-md/daily-notes.py "$@"
+#!/usr/bin/env bash
 
+# Path to your journal project directory
+PROJECT_DIR="$HOME/projects/05-lab/git/daily-notes-md"
+
+# Path where logs should be saved
+LOG_DIR="$HOME/.local/share/daily-notes"
+LOG_FILE="$LOG_DIR/app.log"
+
+# Ensure the log directory exists
+mkdir -p "$LOG_DIR"
+
+# Move to the project directory so relative paths/files resolve right
+cd "$PROJECT_DIR"
+
+# Run the app, capturing both standard output and errors to the log file.
+# Using 'nohup' and '&' detaches it so it runs independently of the terminal.
+PYTHONPATH=. nohup ./.venv/bin/python -u daily_notes/daily-notes.py >> "$LOG_FILE" 2>&1 &
 ```
