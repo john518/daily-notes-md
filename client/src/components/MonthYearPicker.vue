@@ -1,5 +1,8 @@
 <template>
   <div class="month-year-picker">
+    <!-- Reset / Today Button (Moved to left-most position) -->
+    <button class="btn-reset" @click="handleReset" title="Reset to current month">Today</button>
+
     <!-- Month Select -->
     <select v-model.number="draftMonth" class="picker-select">
       <option v-for="m in months" :value="m.value" :key="m.value">
@@ -14,11 +17,8 @@
       </option>
     </select>
 
-    <!-- Action Buttons -->
-    <div class="picker-actions">
-      <button class="btn-go" @click="handleGo" title="Jump to selected month">Go</button>
-      <button class="btn-reset" @click="handleReset" title="Reset to current month">Today</button>
-    </div>
+    <!-- Go Button -->
+    <button class="btn-go" @click="handleGo" title="Jump to selected month">Go</button>
   </div>
 </template>
 
@@ -115,12 +115,6 @@ const handleReset = () => {
 .picker-select:focus {
   outline: none;
   border-color: #3b82f6;
-}
-
-.picker-actions {
-  display: flex;
-  gap: 0.25rem;
-  margin-left: 0.1rem;
 }
 
 button {
