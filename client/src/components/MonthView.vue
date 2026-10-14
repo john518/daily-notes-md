@@ -2,20 +2,18 @@
   <div class="month-container">
     <!-- Header Navigation -->
     <div class="calendar-header">
-      <button class="nav-btn" @click="prevMonth">&lt;</button>
-      <h2>{{ monthNames[currentMonth - 1] }} {{ currentYear }}</h2>
-
-      <!-- Right side of header container -->
-      <div class="header-nav-right">
+      <!-- Left side of header container -->
+      <div class="header-nav-left">
+        <button class="nav-btn" @click="prevMonth">&lt;</button>
 
         <!-- Calendar Icon Toggle & Popover Wrapper -->
         <div class="date-picker-wrapper">
           <!-- The Popover Component -->
           <MonthYearPicker
-          v-if="showDatePicker"
-          :year="currentYear"
-          :month="currentMonth"
-          @jump="onJumpToDate"
+            v-if="showDatePicker"
+            :year="currentYear"
+            :month="currentMonth"
+            @jump="onJumpToDate"
           />
 
           <!-- The Calendar Button/Icon -->
@@ -29,7 +27,12 @@
             </svg>
           </button>
         </div>
+      </div>
 
+      <h2>{{ monthNames[currentMonth - 1] }} {{ currentYear }}</h2>
+
+      <!-- Right side of header container -->
+      <div class="header-nav-right">
         <button class="nav-btn" @click="nextMonth">&gt;</button>
       </div>
     </div>
@@ -62,7 +65,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import DayCell from './DayCell.vue'
-import DayEditorModal from './DayEditorModal.vue' // <-- 1. Import the modal
+import DayEditorModal from './DayEditorModal.vue'
 import MonthYearPicker from './MonthYearPicker.vue'
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -126,23 +129,20 @@ const onEditorClosed = () => {
 
 // Update after day entry saved
 const onDaySaved = ({ fileKey, content }) => {
-  // Map creates a new array reference, guaranteeing Vue triggers a re-render
   days.value = days.value.map(day => {
     if (day.fileKey === fileKey) {
-      return { ...day, content: content } // Return a new object with updated content
+      return { ...day, content: content }
     }
     return day
   })
 }
 
 onMounted(async () => {
-  // NOTE: APPLICATION IS RESPONSIBLE FOR ENSURING PYTHON-JAVASCRIPT BRIDGE (API) IS READY
   await loadMonthData()
 })
 </script>
 
 <style scoped>
-/* Keep your existing style rules here */
 .month-container {
   width: 100%;
   height: 100%;
@@ -183,8 +183,7 @@ onMounted(async () => {
   background-color: #f1f5f9;
 }
 
-
-/* In MonthView.vue <style scoped> */
+.header-nav-left,
 .header-nav-right {
   display: flex;
   align-items: center;
@@ -192,7 +191,7 @@ onMounted(async () => {
 }
 
 .date-picker-wrapper {
-  position: relative; /* Acts as the anchor point for the absolute dropdown */
+  position: relative;
   display: inline-block;
 }
 
@@ -210,20 +209,13 @@ onMounted(async () => {
 .icon-trigger-btn:hover {
   background: #f1f5f9;
   color: #1e293b;
-}.date-picker-wrapper :deep(.month-year-picker) {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  z-index: 100;
-  white-space: nowrap;
 }
 
-/* Position the popover directly to the left of the icon button */
+/* Position the popover to open nicely to the right of the left-side icon button */
 .date-picker-wrapper :deep(.month-year-picker) {
   position: absolute;
-  right: calc(100% + 8px);   /* Push it to the left of the wrapper with an 8px gap */
-  top: 50%;                  /* Center it vertically relative to the icon button */
-  transform: translateY(-50%); /* Perfect vertical centering */
+  left: 0;
+  top: calc(100% + 6px);
   z-index: 100;
   white-space: nowrap;
 }
