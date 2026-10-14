@@ -1,6 +1,7 @@
 # /// script
 # dependencies = [
 #     "requests",
+#     "python-dateutil",
 #     "python-dotenv",
 # ]
 # ///
@@ -23,8 +24,12 @@ Example:
 
 import argparse
 import calendar
+import csv
 import json
 import os
+
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -68,12 +73,12 @@ def fetch_data(yymm: str) -> list | None:
     # Query the range API
     url = f"https://daily-notes.appspot.com/api/range/{start_date}-{end_date}/limit=35"
     print(f"Fetching notes for range {start_date} to {end_date}...")
-    print(f"{url=}")
+    # print(f"{url=}")
 
     cookies = {
         "SACSID": SACSID
     }
-    print(f"{cookies=}")
+    # print(f"{cookies=}")
 
     response = requests.get(url, cookies=cookies)
     # print(response.status_code)
@@ -121,9 +126,48 @@ def write_data(entry_list: list[dict], output_dir: Path):
             print(f"Wrote {file_path}")
 
 
-def process_steps(args: argparse.Namespace):
+def process_steps(args: argparse.Namespace) -> bool:
     """Processes N months based on migration_state.csv file."""
-    raise NotADirectoryError("process_steps() not yet supported")
+    # Get migration status file
+    status_file: Path = args.data_dir / "migrated_months.csv"
+    if not status_file.exists():
+        with open(status_file, "w") as fp:
+            fp.write("YYMM\n")
+            fp.write("2610\n")
+            print(f"Created status file {status_file}")
+
+    # Get last month recorded in the file
+    last_month = None
+    with open(status_file) as fr:
+        csv_reader = csv.reader(fr)
+        all_rows = list(csv_reader)  # OK for small file (150 rows)
+        if not all_rows:
+            raise RuntimeError(f"{status_file} is empty => cannot process")
+        last_row = all_rows[-1]
+        last_month = last_row[0]
+
+    print(f"Last recorded month: {last_month}")
+
+    # Loop over steps
+    yymmdd = f"{last_month}15"
+    dt = datetime.strptime(yymmdd, "%y%m%d")
+
+    for _ in range(args.step):
+        dt -= relativedelta(months=1)
+        yymm = dt.strftime("%y%m")
+        print(f"Processing {yymm}")
+
+        if not process_month(yymm, args.data_dir):
+            print("Error => aborting")
+            return False
+
+        # Append status_file
+        with open(status_file, "a") as fw:
+            writer = csv.writer(fw)
+            writer.writerow([yymm])
+            print("  Success")
+
+    return True
 
 
 def process_month(yymm: str, data_dir: Path) -> bool:
@@ -176,7 +220,9 @@ def main():
     if args.step is not None:
         process_steps(args)
     elif args.month is not None:
-        process_month(args.month, args.data_dir)
+        if process_month(args.month, args.data_dir):
+            print(f"Successfully processed month {args.month}.")
+            print("Note: Since this was a manual run, migration_status.csv was not updated automatically.")
     else:
         print("Internal error - unrecognized CLI arguments")
 
